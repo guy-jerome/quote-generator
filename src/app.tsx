@@ -1,33 +1,62 @@
-import { useState } from 'preact/hooks'
-import preactLogo from './assets/preact.svg'
-import viteLogo from '/vite.svg'
-import './app.css'
+import { useState, useEffect } from "preact/hooks";
+import axios from "axios";
+import "./app.css";
 
 export function App() {
-  const [count, setCount] = useState(0)
+  const [quote, setQuote] = useState("");
+  const [author, setAuthor] = useState("");
+  const [tags, setTags] = useState("");
+  async function getRandomQuote() {
+    try {
+      const result = await axios.get("https://api.quotable.io/quotes/random");
+      setAuthor(result.data[0].author);
+      setQuote(result.data[0].content);
+    } catch (err) {
+      console.log("There was an error", err);
+    }
+  }
 
+  function getTags(event: any) {
+    setTags(event.target.value);
+  }
+  async function getQuote() {
+    try {
+      const result = await axios.get(
+        `https://api.quotable.io/search/quotes?query=${tags}&limit=1`
+      );
+      if (result.data.results[0]) {
+        setAuthor(result.data.results[0].author);
+        setQuote(result.data.results[0].content);
+      } else {
+        setAuthor("");
+        setQuote("Could not find any quotes with those tags.");
+      }
+    } catch (err) {
+      console.log("There was an error", err);
+    }
+  }
+
+  useEffect(() => {
+    getRandomQuote();
+  }, []);
   return (
     <>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} class="logo" alt="Vite logo" />
-        </a>
-        <a href="https://preactjs.com" target="_blank">
-          <img src={preactLogo} class="logo preact" alt="Preact logo" />
-        </a>
+        <h1>Quote Generator</h1>
       </div>
-      <h1>Vite + Preact</h1>
-      <div class="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/app.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p class="read-the-docs">
-        Click on the Vite and Preact logos to learn more
-      </p>
+      <main>
+        <h2>{quote ? quote : "Loading. . ."}</h2>
+        <h3>{author}</h3>
+        <div>
+          <label>Tags:</label>
+          <input
+            type="text"
+            placeholder="eg. inspirational, history, technology"
+            onInput={getTags}
+          ></input>
+        </div>
+        <button onClick={tags ? getQuote : getRandomQuote}>Generate</button>
+      </main>
     </>
-  )
+  );
 }

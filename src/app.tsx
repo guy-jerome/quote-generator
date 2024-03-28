@@ -41,9 +41,9 @@ export function App() {
   }, []);
   return (
     <>
-      <div>
+      <header>
         <h1>Quote Generator</h1>
-      </div>
+      </header>
       <main>
         <h2>{quote ? quote : "Loading. . ."}</h2>
         <h3>{author}</h3>
